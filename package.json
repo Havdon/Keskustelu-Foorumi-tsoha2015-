@@ -1,0 +1,26 @@
+{
+  "name": "Keskustelu-Foorumi-tsoha2015-",
+  "version": "1.0.0",
+  "description": "Nodejs discusion forum writen for the Database Project course at Helsinki University (2015)",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-.git"
+  },
+  "author": "Oskar Koli",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/issues"
+  },
+  "homepage": "https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-",
+  "dependencies": {
+    "express": "^4.13.3",
+    "jade": "^1.11.0"
+  }
+}
