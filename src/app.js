@@ -10,10 +10,7 @@ var app = {
 		app.express = express();
 		app.express.set('view engine', 'jade');
 
-		
-
 		app.express.set('views', 'src/views');
-
 
 		db.init(app);
 
