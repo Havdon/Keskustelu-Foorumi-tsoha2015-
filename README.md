@@ -3,3 +3,5 @@ Nodejs discusion forum writen for the Database Project course at Helsinki Univer
 
 
 Aihe: Keskustelufoorumi (http://advancedkittenry.github.io/suunnittelu_ja_tyoymparisto/aiheet/Keskustelufoorumi.html)
+
+Dokumentaatio: https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/raw/master/doc/KeskustelufoorumiDokumentaatio.pdf
