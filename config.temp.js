@@ -4,5 +4,6 @@ module.exports = {
 		password: "PASSWORD",
 		url: "URL",
 		database: "DATABASE"
-	}
+	},
+	verbose: false
 };

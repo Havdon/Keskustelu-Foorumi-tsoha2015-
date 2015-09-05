@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-",
   "dependencies": {
     "express": "^4.13.3",
+    "extend": "^3.0.0",
     "jade": "^1.11.0"
   }
 }

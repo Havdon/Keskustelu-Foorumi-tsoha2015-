@@ -3,7 +3,7 @@
 try {
 	require.resolve("./config")
 } catch(e) {
-	console.error("Config file not found! See config.temp.js for the required config data.");
+	console.error("config.js file not found in project root! Clone config.temp.js and use it as a tempalte for the required data.");
 	process.exit(e.code);
 }
 
