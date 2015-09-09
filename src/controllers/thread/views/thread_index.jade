@@ -2,6 +2,7 @@ include ../../../views/partials
 extends ../../../views/layout
 
 block content
-	.pure-g.listing
-		each forum in forums
-			+row_subforum(forum)
+	h4.title!=thread.title
+	if posts
+		each post in posts
+			+row_post(post)

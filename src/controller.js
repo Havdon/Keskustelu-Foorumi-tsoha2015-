@@ -1,3 +1,7 @@
+/**
+	The base object which all controllers extend from.
+	It adds util functionallity, to decrease the code needed in the controllers.
+*/
 module.exports = {
 	app: null,
 	__init: function() {
@@ -22,7 +26,10 @@ module.exports = {
 		if (this.pathPrefix.length < 1) 
 			prefix = '';
 		args[0] = prefix + (args[0] !== 'index' ? '/' +  args[0] : '');
-		this.app.log('	' + this.name + ': ' + method.toUpperCase() + ' /' + args[0]);
+		this.app.log('	' + this.name + ': ' + method.toUpperCase() + ' ' + args[0]);
+		if(typeof(args[args.length - 1]) == 'function') { 
+			args[args.length - 1] = args[args.length - 1].bind(this);
+		}
 		return this.app.express[method].apply(this.app.express, args);
 	}
 };

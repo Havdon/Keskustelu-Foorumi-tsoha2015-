@@ -1,3 +1,4 @@
+var Q = require('q');
 module.exports = {
 	name: 'index',
 	pathPrefix: '',
@@ -6,7 +7,12 @@ module.exports = {
 	},
 
 	index: function(req, res){
-		res.render('index', { title: 'test', message: 'message' });
+		Q.all([
+			this.app.models.Subforum.getList({ parent: 'root' })
+		]).then(function(data) {
+			var forums = data[0];
+			res.render('index', { forums: forums });
+		});
 	}
 
 };

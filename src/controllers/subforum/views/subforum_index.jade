@@ -1,5 +1,11 @@
-html
-  head
+include ../../../views/partials
+extends ../../../views/layout
 
-  body
-    b hah
+block content
+	.pure-g.listing
+		if forums
+			each forum in forums
+				+row_subforum(forum)
+		if threads
+			each thread in threads
+				+row_thread(thread, subforum_id)

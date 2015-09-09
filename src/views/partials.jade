@@ -1,0 +1,15 @@
+mixin row_subforum(subforum)
+	a(href='/f/' + subforum.id)
+		.pure-u-1.row.forum
+			.type forum
+			.name!=subforum.name
+
+mixin row_thread(thread, subforum_id)
+	a(href='/f/' + subforum_id + '/t/' + thread.id)
+		.pure-u-1.row.thread
+			.type thread
+			.title!=thread.title
+
+mixin row_post(post)
+	.pure-u-1.row.post
+		.post-body!=post.body.replace(/\n/g, '<br />')

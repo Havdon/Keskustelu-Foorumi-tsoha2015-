@@ -1,6 +1,9 @@
-var fs = require('fs');
-var nodePath = require('path');
-var extend = require('extend');
+/**
+	Bootstraps all controllers into the system.
+*/
+var fs = require('fs'),
+	nodePath = require('path'),
+	extend = require('extend');
 module.exports = function(app) {
 
 	var Controller = require('../controller');
@@ -20,5 +23,6 @@ module.exports = function(app) {
 
 
 	fs.readdirSync(__dirname).forEach(parseController);
+	views.push('src/views');
 	app.express.set('views', views);
 };
