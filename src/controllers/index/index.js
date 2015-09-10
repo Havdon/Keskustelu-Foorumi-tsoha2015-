@@ -7,11 +7,12 @@ module.exports = {
 	},
 
 	index: function(req, res){
+		var self = this;
 		Q.all([
 			this.app.models.Subforum.getList({ parent: 'root' })
 		]).then(function(data) {
 			var forums = data[0];
-			res.render('index', { forums: forums });
+			self.render(res, 'index', { forums: forums });
 		});
 	}
 

@@ -5,5 +5,6 @@ module.exports = {
 		url: "URL",
 		database: "DATABASE"
 	},
+	url_prefix: '/tsoha/',
 	verbose: false
 };

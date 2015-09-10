@@ -31,5 +31,10 @@ module.exports = {
 			args[args.length - 1] = args[args.length - 1].bind(this);
 		}
 		return this.app.express[method].apply(this.app.express, args);
+	},
+	render: function(res, view, data) {
+		data.global = {};
+		data.global.url_prefix = this.app.config.url_prefix;
+		res.render(view, data);
 	}
 };

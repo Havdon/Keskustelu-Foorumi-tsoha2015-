@@ -7,13 +7,14 @@ module.exports = {
 	},
 
 	index: function(req, res) {
+		var self = this;
 		Q.all([
 			this.app.models.Post.getList({ thread_id: req.params.id }),
 			this.app.models.Thread.get({ thread_id: req.params.id })
 		]).then(function(data) {
 			var posts = data[0];
 			var thread = data[1];
-			res.render('thread_index', { thread: thread, posts: posts});
+			self.render(res, 'thread_index', { thread: thread, posts: posts});
 		});
 	}
 };

@@ -5,7 +5,7 @@ block content
 	.pure-g.listing
 		if forums
 			each forum in forums
-				+row_subforum(forum)
+				+row_subforum(forum, global)
 		if threads
 			each thread in threads
-				+row_thread(thread, subforum_id)
+				+row_thread(thread, subforum_id, global)
