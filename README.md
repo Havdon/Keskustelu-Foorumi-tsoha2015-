@@ -31,6 +31,10 @@ Testi datassa on kaksi käyttäjää:
 
 [Rekisteröinti sivu]
 
+### SQL tiedostot
+
+https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/tree/master/src/sql
+
 [etusivu]:http://koli.io/tsoha/
 [Alifoorumi]:http://koli.io/tsoha/f/0
 [Login sivu]: http://koli.io/tsoha/auth
