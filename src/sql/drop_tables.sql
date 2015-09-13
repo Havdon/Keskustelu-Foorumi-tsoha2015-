@@ -1,0 +1,5 @@
+DROP TABLE Admin;
+DROP TABLE Post;
+DROP TABLE Thread;
+DROP TABLE "User";
+DROP TABLE Subforum;
