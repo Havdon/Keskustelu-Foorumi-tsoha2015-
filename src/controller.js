@@ -45,7 +45,7 @@ module.exports = {
 	render: function(res, view, data) {
 		data.global = {};
 		data.global.url_prefix = this.app.config.url_prefix;
-		data.global.url = this.__currentUrl;
+		data.global.url = this.app.config.url_prefix + this.__currentUrl;
 		res.render(view, data);
 	}
 };
