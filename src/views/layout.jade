@@ -9,7 +9,13 @@ html
 	body
 		.pure-g
 			#header.pure-u-1
-				h1 Keskustelufoorumi
+				a(href=global.url_prefix + "/")
+					h1 Keskustelufoorumi
+				if !global.auth
+					a.pure-button.pure-button-primary.login(href=global.url_prefix + '/auth') Login
+				else
+					a.pure-button.button-error.login(href=global.url_prefix + '/auth/logout') Logout
+
 		#main.pure-g
 			.pure-u-1
 				block content

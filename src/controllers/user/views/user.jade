@@ -1,0 +1,14 @@
+include ../../../views/partials
+extends ../../../views/layout
+
+block content
+	h1!=user.username
+	if global.query.madeAdmin
+		.msg-success Successfully made #{user.username} admin!
+	if global.auth && adminSubforums && adminSubforums.length > 0
+		p You can make this user admin of these subforums:
+		form.pure-form(action=global.url + '/makeAdmin' method='post')
+			select(name="subforum_id")
+				each subforum in adminSubforums
+					option(value=subforum.id) #{subforum.name}
+			input.pure-button.button-success(type="submit" value="Make Admin")

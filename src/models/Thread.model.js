@@ -1,17 +1,15 @@
-var Q = require('q');
+var Q = require('q'),
+	shortid = require('shortid');
 
-// Dummy data
-var threads = {
-	0: [ // Games
-		{
-			id: '00',
-			title: 'Call of Duty is the best game ever!',
-			user: 'u1'
-		}
-	]
-};
+var Thread = {
+	wrap: function(thread) {
+		var self = this;
+		thread.getUrl = function() {
+			return self.app.config.url_prefix + '/f/' + thread.parent + '/t/' + thread.id;
+		};
 
-module.exports = {
+		return thread;
+	},
 	getList: function(data) {
 		this.app.assert(typeof(data.parent) !== 'undefined', 'The "parent" not defined when calling Thread.getList');
 		var deffered = Q.defer();
@@ -37,6 +35,38 @@ module.exports = {
 		}
 		deffered.resolve(data);
 		return deffered.promise;
+	},
+
+	create: function(data) {
+		this.require(data, ['title', 'body', 'parent', 'username'], 'Thread.create');
+		var deffered = Q.defer();
+		if (typeof(threads[data.parent]) === 'undefined') {
+			threads[data.parent] = [];
+		}
+		var thread = Thread.wrap({
+			id: shortid.generate(),
+			title: data.title,
+			body: data.body,
+			username: data.username
+		});
+		threads[data.parent].push(thread);
+
+		deffered.resolve(thread);
+		return deffered.promise;
 	}
 
 };
+
+// Dummy data
+var threads = {
+	0: [ // Games
+		Thread.wrap({
+			id: '00',
+			title: 'Call of Duty is the best game ever!',
+			body: 'Whos with me?',
+			username: 'admin'
+		})
+	]
+};
+
+module.exports = Thread;

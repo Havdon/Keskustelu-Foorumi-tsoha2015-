@@ -5,3 +5,5 @@ block content
 	.pure-g.listing
 		each forum in forums
 			+row_subforum(forum, global)
+	if global.auth
+		a.pure-button.pure-button-primary(href=global.url_prefix + '/f/root/create/subforum') Create Subforum

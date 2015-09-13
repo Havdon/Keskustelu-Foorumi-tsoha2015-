@@ -10,6 +10,11 @@ mixin row_thread(thread, subforum_id, global)
 			.type thread
 			.title!=thread.title
 
+
 mixin row_post(post)
 	.pure-u-1.row.post
+		if post.user
+			.post-title
+				a.username(href=global.url_prefix + '/user/' + post.user.username)!=post.user.username
+				.time!=post.time
 		.post-body!=post.body.replace(/\n/g, '<br />')

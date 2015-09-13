@@ -1,0 +1,14 @@
+include ../../../views/partials
+extends ../../../views/layout
+
+block content
+	h1 Login
+	if global.query.error == "invalid"
+		.msg-error Username or password invalid!
+	form.pure-form(action=global.url_prefix + '/auth' method="post")
+		fieldset.pure-group
+			input(type="text" placeholder="Username" name="username" required)
+			input(type="password" placeholder="Password" name="password" required)
+			input.pure-button.button-success(type="submit" value="Login")
+
+	a.pure-button.button-warning(href=global.url_prefix + "/auth/register") Don't have an account?

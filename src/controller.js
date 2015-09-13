@@ -33,7 +33,6 @@ module.exports = {
 			args[args.length - 1] = function() {
 				self.__currentUrl = args[0];
 				var req = arguments[0];
-				console.log(req.params);
 				for(var i in req.params) {
 					self.__currentUrl = self.__currentUrl.replace(':' + i, req.params[i]);
 				}
@@ -42,10 +41,13 @@ module.exports = {
 		}
 		return this.app.express[method].apply(this.app.express, args);
 	},
-	render: function(res, view, data) {
+	render: function(req, res, view, data) {
+		if(!data) data = {};
 		data.global = {};
 		data.global.url_prefix = this.app.config.url_prefix;
 		data.global.url = this.app.config.url_prefix + this.__currentUrl;
+		data.global.auth = (req.session.auth === true);
+		data.global.query = req.query;
 		res.render(view, data);
 	}
 };

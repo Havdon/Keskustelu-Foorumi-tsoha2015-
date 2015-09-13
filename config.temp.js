@@ -6,5 +6,6 @@ module.exports = {
 		database: "DATABASE"
 	},
 	url_prefix: '/tsoha/',
-	verbose: false
+	verbose: false,
+	autoAdminLogin: false // If set to true, all users will automatically be logged in as the "admin" user.
 };

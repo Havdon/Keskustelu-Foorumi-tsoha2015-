@@ -2,7 +2,20 @@ include ../../../views/partials
 extends ../../../views/layout
 
 block content
-	h4.title!=thread.title
-	if posts
-		each post in posts
-			+row_post(post)
+	.thread
+		.pure-u-1.row.thread.post
+			.post-title
+				h3!=thread.title
+				if thread.user
+					.username!=thread.user.username
+					.time!=thread.time
+			.post-body!=thread.body.replace(/\n/g, '<br />')
+		if posts
+			each post in posts
+				+row_post(post)
+	if global.auth
+		h1 Add post to thread
+		form.pure-form(action=global.url method="post")
+			fieldset.pure-group
+				textarea.pure-input-1-3(placeholder="Content" name="body" required)
+				input.pure-button.button-success(type="submit" value="Post")
