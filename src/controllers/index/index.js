@@ -1,5 +1,6 @@
 var Q = require('q');
-module.exports = {
+var Controller = require('../../controller');
+module.exports = Controller({
 	name: 'index',
 	pathPrefix: '',
 	init: function() {
@@ -19,4 +20,4 @@ module.exports = {
 		})
 	}
 
-};
+});

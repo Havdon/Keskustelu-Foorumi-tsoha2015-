@@ -1,13 +1,14 @@
 var Q = require('q');
-module.exports = {
+var Controller = require('../../controller');
+
+module.exports = Controller({
 	name: 'subforum',
 	pathPrefix: 'f',
 	init: function() {
 		this.get(':id', this.index);
-		this.get(':id/create/subforum', this.app.auth.require(), this.createSubforum);
-		this.post(':id/create/subforum/post', this.app.auth.require(), this.postSubforum);
-		this.get(':id/create/thread', this.app.auth.require(), this.createThread);
-		this.post(':id/create/thread/post', this.app.auth.require(), this.postThread);
+		this.get(':id/create/subforum', this.app.auth.require(), this.createView);
+		this.post(':id/create/subforum/post', this.app.auth.require(), this.create);
+		
 	},
 
 	index: function(req, res) {
@@ -34,11 +35,11 @@ module.exports = {
 		});
 	},
 
-	createSubforum: function(req, res) {
+	createView: function(req, res) {
 		this.render(req, res, 'subforum_create', {});
 	},
 
-	postSubforum: function(req, res) {
+	create: function(req, res) {
 		if (!req.body) return res.sendStatus(400);
 		console.log(1);
 		var self = this;
@@ -56,22 +57,5 @@ module.exports = {
 			res.sendStatus(500);
 		})		
 		console.log(4);
-	},
-
-	createThread: function(req, res) {
-		this.render(req, res, 'subforum_create_thread', { subforum_id: req.params.id });
-	},
-
-	postThread: function(req, res) {
-		if (!req.body) return res.sendStatus(400);
-		var self = this;
-		this.app.models.Thread.create({
-			parent: req.params.id,
-			title: req.body.title,
-			body: req.body.body,
-			username: req.session.username
-		}).then(function(thread) {
-			res.redirect(thread.getUrl());
-		});
 	}
-};
+});

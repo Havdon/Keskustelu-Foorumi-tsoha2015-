@@ -1,8 +1,7 @@
 var Q = require('q');
+var Model = require('../model');
 
-
-
-var Post = {
+var Post = Model({
 	wrap: function(post) {
 
 		return post;
@@ -80,7 +79,7 @@ var Post = {
 		return deffered.promise;
 	}
 
-};
+});
 
 // Dummy data
 var posts = {

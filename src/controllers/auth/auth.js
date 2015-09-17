@@ -1,5 +1,6 @@
 var Q = require('q');
-var Auth = {
+var Controller = require('../../controller');
+var Auth = Controller({
 	name: 'auth',
 	pathPrefix: 'auth',
 	init: function() {
@@ -86,6 +87,6 @@ var Auth = {
 		res.redirect(this.app.config.url_prefix + '/auth?error=' + error);
 	}
 
-};
+});
 
 module.exports = Auth;

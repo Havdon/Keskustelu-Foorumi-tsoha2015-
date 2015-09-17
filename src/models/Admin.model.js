@@ -1,8 +1,9 @@
 var Q = require('q');
 
+var Model = require('../model');
 
 
-var Admin = {
+var Admin = Model({
 	wrap: function(admin) {
 
 		return admin;
@@ -65,7 +66,7 @@ var Admin = {
 		
 		return deffered.promise;
 	}
-};
+});
 
 
 var admins = [

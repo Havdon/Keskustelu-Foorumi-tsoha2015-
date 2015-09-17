@@ -1,13 +1,13 @@
 var Q = require('q');
-module.exports = {
+var Controller = require('../../controller');
+module.exports = Controller({
 	name: 'user',
-	pathPrefix: 'user',
 	init: function() {
-		this.get(':id', this.getUser);
-		this.post(':id/makeAdmin', this.app.auth.require(), this.makeAdmin);
+		this.get('user/:id', this.index);
+		this.post('user/:id/makeAdmin', this.app.auth.require(), this.makeAdmin);
 	},
 
-	getUser: function(req, res) {
+	index: function(req, res) {
 		var self = this;
 		Q.all([this.app.models.Admin.getSubforumsUserIsAdminIn({
 			loadById: true,
@@ -21,7 +21,6 @@ module.exports = {
 			var checkIdAdmin = function(index, subforum) {
 				promises.push(self.app.models.Admin.isUserAdmin({username: user.username, subforum_id: subforum.id})
 					.then(function(isAdmin) {
-						console.log("index = " + index + " isAdmin = " + isAdmin)
 						if (isAdmin)
 							subforums.splice(subforums.indexOf(subforum), 1);
 						return Q();
@@ -49,4 +48,4 @@ module.exports = {
 			res.redirect(self.app.config.url_prefix + '/user/' + req.params.id + "?error=makeAdmin");
 		}).done();
 	}
-};
+});

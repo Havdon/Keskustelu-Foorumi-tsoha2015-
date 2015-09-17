@@ -1,7 +1,8 @@
 var Q = require('q'),
 	shortid = require('shortid');
 
-var Subforum = {
+var Model = require('../model');
+var Subforum = Model({
 
 	wrap: function(subforum) {
 		var self = this;
@@ -83,7 +84,7 @@ var Subforum = {
 		return deffered.promise;
 	}
 
-};
+});
 
 // Dummy data
 var forums = {

@@ -2,8 +2,10 @@ include ../../../views/partials
 extends ../../../views/layout
 
 block content
-	h1 Add post to thread
+	h1 Create new thread
 	form.pure-form(action=global.url method="post")
 		fieldset.pure-group
+			legend Create new thread
+			input(type="text" placeholder="Title" name="title" required)
 			textarea.pure-input-1-3(placeholder="Content" name="body" required)
-			input.pure-button.button-success(type="submit" value="Post")
+			input.pure-button.button-success(type="submit" value="Create")

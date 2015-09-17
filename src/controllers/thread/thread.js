@@ -1,13 +1,14 @@
 var Q = require('q');
-module.exports = {
+var Controller = require('../../controller');
+module.exports = Controller({
 	name: 'thread',
-	pathPrefix: 'f/:subforum_id/t',
 	init: function() {
-		this.get(':id', this.index);
-		this.post(':id', this.app.auth.require(), this.addPost);
+		this.get('f/:subforum_id/t', this.app.auth.require(), this.createView);
+		this.post('f/:subforum_id/t', this.app.auth.require(), this.create);
+		this.get('f/:subforum_id/t/:id', this.list);
 	},
 
-	index: function(req, res) {
+	list: function(req, res) {
 		var self = this;
 		Q.all([
 			this.app.models.Post.getList({ thread_id: req.params.id, loadById: true}),
@@ -24,20 +25,20 @@ module.exports = {
 		});
 	},
 
-	addPost: function(req, res) {
+	createView: function(req, res) {
+		this.render(req, res, 'thread_create', { subforum_id: req.params.subforum_id });
+	},
+
+	create: function(req, res) {
+		if (!req.body) return res.sendStatus(400);
 		var self = this;
-		this.app.models.Post.create({
+		this.app.models.Thread.create({
+			parent: req.params.subforum_id,
+			title: req.body.title,
 			body: req.body.body,
-			username: req.session.username,
-			thread_id: req.params.id
-		}).then(function(post) {
-			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.id);
-		}, function(err) {
-			self.app.log(err);
-			self.sendStatus(505);
-		}).catch(function(err) {
-			self.app.log(err);
-			self.sendStatus(505);
+			username: req.session.username
+		}).then(function(thread) {
+			res.redirect(thread.getUrl());
 		});
 	}
-};
+});

@@ -1,7 +1,7 @@
 
 var Q = require('q');
-
-var User = {
+var Model = require('../model');
+var User = Model({
 	hash: function(str) {
 		return str; // TODO: Implement password hashing.
 	},
@@ -46,7 +46,7 @@ var User = {
 		});
 		return deffered.promise;
 	}
-};
+});
 
 var users = [
 	User.wrap({

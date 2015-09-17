@@ -1,7 +1,8 @@
 var Q = require('q'),
 	shortid = require('shortid');
+var Model = require('../model');
 
-var Thread = {
+var Thread = Model({
 	wrap: function(thread) {
 		var self = this;
 		thread.getUrl = function() {
@@ -55,7 +56,7 @@ var Thread = {
 		return deffered.promise;
 	}
 
-};
+});
 
 // Dummy data
 var threads = {
