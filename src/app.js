@@ -21,9 +21,9 @@ var app = {
 		app.express.use(bodyParser.urlencoded({
   			extended: true
 		}));
-		app.express.use(timeout(3000));
+		app.express.use(timeout(30000));
 		db.init(app);
-
+		app.db = db;
 		app.auth = auth;
 		app.auth.init(app);
 

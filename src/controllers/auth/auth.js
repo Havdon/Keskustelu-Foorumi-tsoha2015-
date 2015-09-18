@@ -76,7 +76,7 @@ var Auth = Controller({
 		}, function() {
 			self.app.log('Tried to login with invalid user.');
 			Auth.loginError(res, 'invalid');
-		});
+		}).done();
 	},
 
 	registerError: function(res, error) {

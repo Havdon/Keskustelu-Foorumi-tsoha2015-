@@ -14,21 +14,10 @@ var User = Model({
 	},
 	get: function(data) {
 		this.require(data, ['username'], 'User.get');
-		var deffered = Q.defer();
-		var user = null;
-		for(var i in users) {
-			if (users[i].username === data.username) {
-				user = users[i];
-				break;
-			}
-		}
-		if (user) {
-			deffered.resolve(user);
-		}
-		else {
-			deffered.reject('User was not found.');
-		}
-		return deffered.promise;
+		return this.app.db.execute('SELECT * FROM "User" WHERE username = \'%0\'', [data.username]).then(function(result) {
+			console.log(result.rows);
+			return Q(User.wrap(result.rows[0]));
+		});
 	},
 	create: function(data) {
 		this.require(data, ['username', 'password'], 'User.get');
