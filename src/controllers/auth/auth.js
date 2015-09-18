@@ -39,9 +39,7 @@ var Auth = Controller({
 			req.session.save(function(err) {
 				res.redirect(self.app.config.url_prefix + '/');
 			});
-		}, function() {
-			Auth.registerError(res, 'exists');
-		})
+		}).done();
 	},
 
 	authenticate: function(req, res){
@@ -54,7 +52,7 @@ var Auth = Controller({
 		}
 		var self = this;
 		this.app.models.User.get({username: req.body.username}).then(function(user) {
-			if (user.validPassword(req.body.password)) {
+			if (user && user.validPassword(req.body.password)) {
 				req.session.auth = true;
 				req.session.username = req.body.username;
 				/*
