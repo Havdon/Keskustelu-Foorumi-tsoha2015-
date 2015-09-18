@@ -1,9 +1,13 @@
 
 var Q = require('q');
-var Model = require('../model');
+var Model = require('../model'),
+	crypto = require('crypto');
 var User = Model({
-	hash: function(str) {
-		return str; // TODO: Implement password hashing.
+	hash: function(str, salt) {
+		if (!salt) {
+			return str; // TODO: Implement password hashing.
+		}
+		return crypto.createHash('md5').update(str + salt).digest('hex');
 	},
 	wrap: function(user) {
 		user.password = User.hash(user.password);
@@ -20,20 +24,12 @@ var User = Model({
 		});
 	},
 	create: function(data) {
+		var salt = crypto.randomBytes(128).toString('base64');
 		this.require(data, ['username', 'password'], 'User.get');
-		var self = this;
-		var deffered = Q.defer();
-		User.get(data).then(function(user) {
-			deffered.reject('User alredy exists.');
-		}, function() {
-			var user = User.wrap(data);
-			users.push(user);
-			deffered.resolve(user);
-		}).catch(function(err) {
-			self.app.log(err);
-			deffered.reject();
+		return this.app.db.execute('INSERT INTO "User" (username, password, salt) VALUES (\'%0\', \'%1\', \'%2\')', [data.username, User.hash(data.password, salt), salt]).then(function(result) {
+			console.log(result.rows);
+			return Q(User.wrap(result.rows[0]));
 		});
-		return deffered.promise;
 	}
 });
 

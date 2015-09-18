@@ -8,9 +8,9 @@ VALUES 	('0', 'Games', 	'root'),
 		('00','Call of Duty', '0');
 
 -- USERS
-INSERT INTO "User" (username, password, salt)
-VALUES 	('admin', 'password', 'salt'),
-		('billy', 'password', 'salt');
+INSERT INTO "User" (username, password)
+VALUES 	('admin', 'password'),
+		('billy', 'password');
 
 -- THREADS
 INSERT INTO Thread (thread_id, title, body, subforum_id, username)

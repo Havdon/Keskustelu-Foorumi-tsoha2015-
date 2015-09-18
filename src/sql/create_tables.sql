@@ -7,7 +7,7 @@ CREATE TABLE Subforum(
 CREATE TABLE "User"(
 	username 	TEXT PRIMARY KEY NOT NULL,
 	password	TEXT,
-	salt		CHAR(20)
+	salt		TEXT
 );
 
 CREATE TABLE Thread(
