@@ -4,7 +4,7 @@ var fs = require('fs'),
 module.exports = function(app) {
 
 	var parseModels = function(name) {
-		if (name === nodePath.basename(__filename)) return;
+		if (name === nodePath.basename(__filename) || name.charAt(0) === '.') return;
 		
 		var model = require(__dirname + '/' + name);
 		app.assert(model instanceof Model, "Models need to be wrapped in the Model funciton: " + name);

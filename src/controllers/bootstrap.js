@@ -10,7 +10,7 @@ module.exports = function(app) {
 	
 	var views = [];
 	var parseController = function(name) {
-		if (name === nodePath.basename(__filename)) return;
+		if (name === nodePath.basename(__filename) || name.charAt(0) === '.') return;
 		app.log('\n Controller %s', name);
 		var controller = require(__dirname + '/' + name + '/' + name);
 		app.assert(controller instanceof Controller, "Controllers need to be wrapped in Controller");
