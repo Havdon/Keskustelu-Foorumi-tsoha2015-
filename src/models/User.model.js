@@ -18,8 +18,9 @@ var User = Model({
 	},
 	exists: function(data) {
 		this.require(data, ['username'], 'User.get');
-		return this.app.db.execute('SELECT 1 FROM "User" WHERE username = \'%0\'', [data.username]).then(function(result) {
-			return Q(result.rows && result.rows.length === 1 && result.rows[0] == 1);
+		return this.app.db.execute('SELECT 1 as isuser FROM "User" WHERE username = \'%0\'', [data.username]).then(function(result) {
+			console.log(result);
+			return Q(result.rows && result.rows.length === 1 && result.rows[0].isuser == 1);
 		});
 	},
 	get: function(data) {

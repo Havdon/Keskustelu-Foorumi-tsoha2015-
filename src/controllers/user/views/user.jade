@@ -10,5 +10,5 @@ block content
 		form.pure-form(action=global.url + '/makeAdmin' method='post')
 			select(name="subforum_id")
 				each subforum in adminSubforums
-					option(value=subforum.id) #{subforum.name}
+					option(value=subforum.subforum_id) #{subforum.name}
 			input.pure-button.button-success(type="submit" value="Make Admin")

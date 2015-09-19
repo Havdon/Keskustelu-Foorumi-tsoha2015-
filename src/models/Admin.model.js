@@ -9,31 +9,31 @@ var Admin = Model({
 		return admin;
 	},
 
+	exists: function(data) {
+		this.require(data, ['username', 'subforum_id'], 'Admin.exists');
+		return this.app.db.execute('SELECT 1 AS isAdmin FROM Admin WHERE username = \'%username\' AND subforum_id = \'%subforum_id\'', data).then(function(result) {
+			return Q(result.rows && result.rows.length >= 1 && result.rows[0].isadmin == 1);
+		});
+	},
+
+	create: function(data) {
+		this.require(data, ['subforum_id', 'username'], 'Admin.create');
+		return this.app.db.execute('INSERT INTO Admin (username, subforum_id) VALUES (\'%username\', \'%subforum_id\')', data)
+			.then(function(result) {
+
+			});
+	},
+
 	isUserAdmin: function(data) {
 		this.require(data, ['subforum_id'], 'Admin.isUserAdmin');
-		var deffered = Q.defer();
-		var isAdmin = false;
-		if (data.username) {
-			for(var i in admins) {
-				if (admins[i].username == data.username && admins[i].subforum_id == data.subforum_id) {
-					isAdmin = true;
-					break;
-				}
-			}
-		}
-		deffered.resolve(isAdmin);
-
-		return deffered.promise;
+		if (!data.username)
+			return Q.resolve(false);
+		return Admin.exists(data);
 	},
 
 	makeUserAdmin: function(data) {
 		this.require(data, ['subforum_id', 'username'], 'Admin.makeUserAdmin');
-		var deffered = Q.defer();
-		var admin = Admin.wrap(data);
-		admins.push(admin);
-		console.log(admin);
-		deffered.resolve(admin);
-		return deffered.promise;
+		return Admin.create(data);
 	},
 
 	getSubforumsUserIsAdminIn: function(data) {

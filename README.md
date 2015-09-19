@@ -7,7 +7,6 @@ Aihe: Keskustelufoorumi (http://advancedkittenry.github.io/suunnittelu_ja_tyoymp
 Dokumentaatio: https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/raw/master/doc/KeskustelufoorumiDokumentaatio.pdf
 
 ### HUOM: 
-Sivusto käyttää tällä hetkellä ainoastaa muistissa siaitsevaa dataa. Alifoorumeiden, käyttäjien, säikeiten ja kirjausten luominen toimii (jotakuinkin), mutta jos serveri restartataan niin kaikki data (paitsi testi data) katoaa.
 
 Testi datassa on kaksi käyttäjää:
 

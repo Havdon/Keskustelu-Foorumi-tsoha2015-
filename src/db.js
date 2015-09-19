@@ -7,12 +7,6 @@ var db = {
 	init: function(app) {
 		db.url = "postgres://" + app.config.db.username + ":" + app.config.db.password + "@" + app.config.db.url + "/" + app.config.db.database;
 		db.app = app;
-		/*
-		db.executeFile('src/sql/drop_tables.sql')
-		.then(function() { return db.executeFile('src/sql/create_tables.sql'); })
-		.then(function() { return db.executeFile('src/sql/add_test_data.sql'); })
-		.done();
-		*/
 	},
 
 	executeFile: function(file) {
@@ -32,14 +26,54 @@ var db = {
 		return deffered.promise;
 	},
 
-	execute: function(sql, inserts) {
+	parseInsert: function(sql, insertName, insertValue) {
+		var str = insertValue
+		if (insertValue instanceof Array) {
+			str = '(';
+			for (var i = 0; i < insertValue.length; i++) {
+				var value = insertValue[i];
+				var isNum = (typeof(value) === 'number');
+				if (!isNum)
+					value = value.replace(/\'/g,"''");
+				if (!isNum)
+					str += '\'';
+				str += value;
+				if (!isNum)
+					str += '\'';
+				if (i < insertValue.length - 1)
+					str += ', ';
+			}
+			str += ')';
+		}
+		else {
+			if(!(typeof(str) === 'number'))
+				str = str.replace(/\'/g,"''");
+		}
+		var find = '%' + insertName;
+		var re = new RegExp(find, 'g');
+		sql = sql.replace(re, str);
+		return sql;
+	},
+
+	parseInserts: function(sql, inserts) {
 		if (inserts) {
+			var isArray = (inserts instanceof Array);
 			var ix = 0;
 			for(var i in inserts) {
-				sql = sql.replace('%' + ix, inserts[i]);
+				if (isArray) {
+					sql = db.parseInsert(sql, ix, inserts[i]);
+				}
+				else {
+					sql = db.parseInsert(sql, i, inserts[i]);
+				}
 				ix++;
 			}
 		}
+		return sql;
+	},
+
+	execute: function(sql, inserts) {
+		sql = db.parseInserts(sql, inserts);
 		console.log(sql);
 		var deffered = Q.defer();
 		pg.connect(db.url, function(err, client, done) {
@@ -56,9 +90,11 @@ var db = {
 		  });
 		  query.on('error', function(err) {
 		  	console.error(err);
+		  	done();
 		  	deffered.reject();
 		  });
 		  query.on('end', function(result) {
+		  	done();
 		  	deffered.resolve(result);
 		  });
 		});

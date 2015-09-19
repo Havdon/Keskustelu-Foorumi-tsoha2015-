@@ -39,6 +39,8 @@ var Auth = Controller({
 			req.session.save(function(err) {
 				res.redirect(self.app.config.url_prefix + '/');
 			});
+		}, function() {
+			self.registerError(res, "exists");
 		}).done();
 	},
 

@@ -4,70 +4,68 @@ var Model = require('../model');
 
 var Thread = Model({
 	wrap: function(thread) {
-		var self = this;
-		thread.getUrl = function() {
-			return self.app.config.url_prefix + '/f/' + thread.parent + '/t/' + thread.id;
-		};
-
+		if (thread instanceof Array) {
+			for(var i in thread) {
+				thread[i] = Thread.wrap(thread[i]);
+			}
+		}
+		else {
+			if (thread.subforum_id)
+				thread.subforum_id = thread.subforum_id.replace(/ /g,'');
+			if (thread.thread_id)
+				thread.thread_id = thread.thread_id.replace(/ /g,'');
+			var self = this;
+			thread.getUrl = function() {
+				return self.app.config.url_prefix + '/f/' + thread.subforum_id + '/t/' + thread.thread_id;
+			};
+		}
 		return thread;
 	},
 	getList: function(data) {
-		this.app.assert(typeof(data.parent) !== 'undefined', 'The "parent" not defined when calling Thread.getList');
-		var deffered = Q.defer();
-		var data = threads[data.parent];
-		if (typeof(data) === 'undefined') data = [];
-		deffered.resolve(data);
-		return deffered.promise;
+		this.require(data, ['subforum_id'], 'Thread.getList');
+		return this.app.db.execute('SELECT * FROM Thread WHERE subforum_id = \'%0\'', [data.subforum_id]).then(function(result) {
+			if (!result.rows || result.rows.length === 0) {
+				return Q.resolve([]);
+			}
+			return Q(Thread.wrap(result.rows));
+		});
 	},
 	get: function(data) {
-		this.app.assert(typeof(data.thread_id) !== 'undefined', 'The "thread_id" not defined when calling Thread.get');
-		var deffered = Q.defer();
-		var data;
-		for(var i in threads) {
-			var found = false;
-			for(var j in threads[i]) {
-				if (threads[i][j].id === data.thread_id) {
-					data = threads[i][j];
-					found = true;
-					break;
-				}
+		this.require(data, ['thread_id'], 'Thread.get');
+		return this.app.db.execute('SELECT * FROM Thread WHERE thread_id = \'%0\'', [data.thread_id]).then(function(result) {
+			if (!result.rows || result.rows.length != 1) {
+				return Q.reject(404);
 			}
-			if(found) break;
-		}
-		deffered.resolve(data);
-		return deffered.promise;
+			return Q(Thread.wrap(result.rows[0]));
+		});
 	},
 
 	create: function(data) {
-		this.require(data, ['title', 'body', 'parent', 'username'], 'Thread.create');
-		var deffered = Q.defer();
-		if (typeof(threads[data.parent]) === 'undefined') {
-			threads[data.parent] = [];
-		}
-		var thread = Thread.wrap({
-			id: shortid.generate(),
+		this.require(data, ['title', 'body', 'subforum_id', 'username'], 'Thread.create');
+		var thread = {
+			thread_id: shortid.generate(),
 			title: data.title,
 			body: data.body,
-			username: data.username
+			username: data.username,
+			subforum_id: data.subforum_id
+		};
+		return this.app.db.execute('INSERT INTO Thread (thread_id, title, body, subforum_id, username) VALUES (\'%thread_id\', \'%title\', \'%body\', \'%subforum_id\', \'%username\') RETURNING *', thread)
+		.then(function(result) {
+			if (!result.rows || result.rows.length != 1) {
+				return Q.reject(404);
+			}
+			return Q(Thread.wrap(result.rows[0]));
 		});
-		threads[data.parent].push(thread);
+	},
 
-		deffered.resolve(thread);
-		return deffered.promise;
+	delete: function(data) {
+		this.require(data, ['thread_id'], 'Thread.delete');
+		return this.app.db.execute('DELETE FROM Thread WHERE thread_id=\'%thread_id\'', data)
+			.then(function(result) {
+				return Q();
+			});
 	}
 
 });
-
-// Dummy data
-var threads = {
-	0: [ // Games
-		Thread.wrap({
-			id: '00',
-			title: 'Call of Duty is the best game ever!',
-			body: 'Whos with me?',
-			username: 'admin'
-		})
-	]
-};
 
 module.exports = Thread;

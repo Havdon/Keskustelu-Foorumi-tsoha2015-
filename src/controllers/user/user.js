@@ -19,8 +19,9 @@ module.exports = Controller({
 			var user = data[1];
 			var promises = [];
 			var checkIdAdmin = function(index, subforum) {
-				promises.push(self.app.models.Admin.isUserAdmin({username: user.username, subforum_id: subforum.id})
+				promises.push(self.app.models.Admin.isUserAdmin({username: user.username, subforum_id: subforum.subforum_id})
 					.then(function(isAdmin) {
+						console.log("isAdmin = " + isAdmin)
 						if (isAdmin)
 							subforums.splice(subforums.indexOf(subforum), 1);
 						return Q();

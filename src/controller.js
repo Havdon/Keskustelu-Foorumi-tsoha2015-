@@ -4,6 +4,7 @@
 */
 "use strict";
 
+var Q = require('q');
 var extend = require('extend');
 var Controller = function(app) {
 	this.app = null;
@@ -31,6 +32,7 @@ Controller.prototype.post = function() {
 Controller.prototype.put = function() {
 	return this.call("put", arguments);
 };
+
 
 Controller.prototype.call  = function(method, args) {
 	var self = this;

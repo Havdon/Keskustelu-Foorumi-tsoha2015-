@@ -14,10 +14,7 @@ module.exports = Controller({
 		]).then(function(data) {
 			var forums = data[0];
 			self.render(req, res, 'index', { forums: forums });
-		}).catch(function(err) {
-			self.app.log(err);
-			res.sendStatus(500);
-		})
+		}).done();
 	}
 
 });

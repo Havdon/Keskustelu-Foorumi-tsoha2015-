@@ -8,7 +8,7 @@ Model.prototype.__init = function(app) {
 };
 Model.prototype.require = function(data, values, methodName) {
 	for(var i in values) {
-		this.app.assert(typeof(data[values[i]]) !== 'undefined', 'The "' + values[i] + '" not defined when calling ' + methodName);
+		this.app.assert(typeof(data[values[i]]) !== 'undefined', 'The "' + values[i] + '" not defined when calling ' + methodName + ' Data : ' + JSON.stringify(data));
 	}
 };
 

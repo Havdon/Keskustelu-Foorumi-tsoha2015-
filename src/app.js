@@ -31,6 +31,17 @@ var app = {
 		bootstrapControllers(app);
 
 		app.server = app.express.listen(3000);
+
+
+		app.express.get(app.config.url_prefix + '/clean', function(req, res) {
+			db.executeFile('src/sql/drop_tables.sql')
+			.then(function() { return db.executeFile('src/sql/create_tables.sql'); })
+			.then(function() { return db.executeFile('src/sql/add_test_data.sql'); })
+			.then(function() {
+				res.send('Done.');
+			})
+			.done();
+		});
 	}
 };
 

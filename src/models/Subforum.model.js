@@ -5,24 +5,33 @@ var Model = require('../model');
 var Subforum = Model({
 
 	wrap: function(subforum) {
-		var self = this;
-		subforum.getUrl = function() {
-			return self.app.config.url_prefix + '/f/' + subforum.id;
-		};
+		if (subforum instanceof Array) {
+			for(var i in subforum) {
+				subforum[i] = Subforum.wrap(subforum[i]);
+			}
+		}
+		else {
+			var self = this;
+			subforum.getUrl = function() {
+				return self.app.config.url_prefix + '/f/' + subforum.subforum_id;
+			};
+		}
 		return subforum;
 	},
 
 	getList: function(data) {
-		this.app.assert(typeof(data.parent) !== 'undefined', 'The "parent" not defined when calling Subforum.getList');
-		var deffered = Q.defer();
-		var data = forums[data.parent];
-		if (typeof(data) === 'undefined') data = null;
-		deffered.resolve(data);
-		return deffered.promise;
+		this.require(data, ['parent'], 'Subforum.getList');
+		return this.app.db.execute('SELECT * FROM Subforum WHERE parent = \'%0\'', [data.parent])
+			.then(function(result) {
+				if (!result.rows) {
+					return Q.reject([]);
+				}
+				return Q(Subforum.wrap(result.rows));
+			});
 	},
 
 	get: function(data) {
-		if(data.id) {
+		if(data.subforum_id) {
 			return this.getSingle(data);
 		}
 		else {
@@ -31,88 +40,44 @@ var Subforum = Model({
 	},
 	getAll: function(data) {
 		this.require(data, ['subforums'], 'Subforum.getAll');
-		var promises = [];
-		for(var i in data.subforums) {
-			promises.push(this.getSingle({id: data.subforums[i] }));
-		}
-		return Q.all(promises);
+		if (!data.subforums || data.subforums.length < 1)
+			return Q([]);
+		return this.app.db.execute('SELECT * FROM Subforum WHERE subforum_id IN %subforums', data)
+			.then(function(result) {
+				if (!result.rows) {
+					return Q.reject([]);
+				}
+				return Q(Subforum.wrap(result.rows));
+			});
 	},
 	getSingle: function(data) {
-		this.require(data, ['id'], 'Subforum.getSingle');
-		var deffered = Q.defer();
-		var forum = null;
-		for(var i in forums) {
-			for(var j in forums[i]) {
-				if (forums[i][j].id == data.id) {
-					forum = forums[i][j];
-					break;
-				}
+		this.require(data, ['subforum_id'], 'Subforum.getSingle');
+		return this.app.db.execute('SELECT * FROM Subforum WHERE subforum_id = \'%0\'', [data.subforum_id + '']).then(function(result) {
+			if (!result.rows || result.rows.length != 1) {
+				return Q.reject(404);
 			}
-			if (forum) break;
-		}
-		if (!forum) {
-			deffered.reject('Subforum ' + data.id + ' was not found.');
-		}
-		else {
-			deffered.resolve(forum);
-		}
-		return deffered.promise;
+			return Q(Subforum.wrap(result.rows[0]));
+		});
 	},
 	create: function(data) {
 		this.require(data, ['name', 'parent', 'username'], 'Subforum.create');
-		var deffered = Q.defer();
 		var self = this;
-
-		if (typeof(forums[data.parent]) === 'undefined') {
-			forums[data.parent] = [];
-		}
-		var forum = Subforum.wrap({
-			id: shortid.generate(),
-			name: data.name
-		});
-		forums[data.parent].push(forum);
-		this.app.models.Admin.makeUserAdmin({
-			username: data.username,
-			subforum_id: forum.id
-		}).then(function() {
-			deffered.resolve(forum);
-		}, function(err) {
-			self.app.log(err);
-			deffered.reject();
-		}).done();
-
-		return deffered.promise;
+		var subforum = {
+			subforum_id: shortid.generate(),
+			name: data.name,
+			parent: data.parent
+		};
+		return this.app.db.execute('INSERT INTO Subforum (subforum_id, name, parent) VALUES (\'%subforum_id\', \'%name\', \'%parent\') RETURNING *', subforum)
+			.then(function(result) {
+				subforum = Subforum.wrap(result.rows[0]);
+				return self.app.models.Admin.makeUserAdmin({
+					username: data.username,
+					subforum_id: subforum.subforum_id
+				}).then(function() {
+					return Q(subforum);
+				});
+			});
 	}
 
 });
-
-// Dummy data
-var forums = {
-	root: [
-
-		Subforum.wrap({
-			id: '0',
-			name: 'Games',
-			parent: 'root'
-		}),
-		Subforum.wrap({
-			id: '1',
-			name: 'News',
-			parent: 'root'
-		}),
-		Subforum.wrap({
-			id: '2',
-			name: 'AskFoorumi',
-			parent: 'root'
-		})
-	],
-	0: [
-		Subforum.wrap({
-			id: '00',
-			name: 'Call of Duty',
-			parent: '0'
-		})
-	]
-}
-
 module.exports = Subforum;
