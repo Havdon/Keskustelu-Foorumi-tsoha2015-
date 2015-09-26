@@ -2,7 +2,16 @@ var Q = require('q'),
 	shortid = require('shortid');
 var Model = require('../model');
 
+var ThreadSchema = {
+	thread_id: 'string',
+	subforum_id: 'string',
+	title: 'string',
+	body: 'string',
+	username: 'string',
+};
+
 var Thread = Model({
+	// Wraps raw thread data from database and adds utility functions.
 	wrap: function(thread) {
 		if (thread instanceof Array) {
 			for(var i in thread) {
@@ -58,10 +67,35 @@ var Thread = Model({
 		});
 	},
 
+	update: function(data) {
+		this.require(data, ['thread_id'], 'Thread.update');
+		this.validateWithSchema(data, ThreadSchema);
+		var set = '';
+		var ix = 0;
+		var attrCount = Object.keys(data).length;
+		for (var i in data) {
+			if (i === 'thread_id') continue;
+			var dataStr = data[i];
+			dataStr = dataStr.replace(/\'/g,"''");
+			set = set + i + ' = \'' + dataStr + '\'';
+			if (ix < attrCount - 2) 
+				set = set + ', ';
+			ix++;
+		}
+		// TODO: Fix SQL Injection danger.
+		return this.app.db.execute('UPDATE Thread SET ' + set + ' WHERE thread_id = \'' + data.thread_id + '\' RETURNING *')
+			.then(function(result) {
+				if (!result.rows || result.rows.length != 1) {
+					return Q.reject(404);
+				}
+				return Q(Thread.wrap(result.rows[0]));
+			});
+	},
+
 	delete: function(data) {
 		this.require(data, ['thread_id'], 'Thread.delete');
 		return this.app.db.execute('DELETE FROM Thread WHERE thread_id=\'%thread_id\'', data)
-			.then(function(result) {
+			.then(function() {
 				return Q();
 			});
 	}

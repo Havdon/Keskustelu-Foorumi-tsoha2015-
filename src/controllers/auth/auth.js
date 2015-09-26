@@ -1,3 +1,6 @@
+/**
+	Controller that handles user login, logout, registration and authetication.
+*/
 var Q = require('q');
 var Controller = require('../../controller');
 var Auth = Controller({

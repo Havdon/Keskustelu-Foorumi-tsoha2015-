@@ -3,6 +3,7 @@ var Q = require('q'),
 var Model = require('../model');
 
 var Post = Model({
+	// Wraps raw database data and adds utility functions.
 	wrap: function(post) {
 
 		return post;
@@ -68,6 +69,18 @@ var Post = Model({
 			}
 			return Q(Post.wrap(result.rows[0]));
 		});
+	},
+
+	destroy: function(data) {
+		this.require(data, ['post_id', 'username'], 'Thread.destroy');
+		return this.app.db.execute('DELETE FROM Post WHERE post_id=\'%post_id\' AND username=\'%username\' RETURNING *', data)
+			.then(function(result) {
+				console.log(result);
+				if (!result.rows || result.rows.length != 1) {
+					return Q.reject(404);
+				}
+				return Q(Post.wrap(result.rows[0]));
+			});
 	}
 
 });

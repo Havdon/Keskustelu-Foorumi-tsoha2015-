@@ -1,3 +1,7 @@
+/**
+	The application root object, which inits and bootstraps the system at start.
+	A god object which contains references to most relevant objects in the system.
+*/
 var express = require('express');
 var db = require('./db');
 var bootstrapControllers = require('./controllers/bootstrap');

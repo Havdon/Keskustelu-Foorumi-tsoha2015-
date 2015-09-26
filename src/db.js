@@ -1,3 +1,7 @@
+/**
+	The database connection object.
+	Used to connect to the PostgreSQL database and execute commands.
+*/
 var pg = require('pg'),
 	fs = require('fs'),
 	Q = require('q');

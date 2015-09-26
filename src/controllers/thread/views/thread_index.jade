@@ -10,6 +10,9 @@ block content
 					.username!=thread.user.username
 					.time!=thread.time
 			.post-body!=thread.body.replace(/\n/g, '<br />')
+				if global.auth && global.username === thread.username
+					a(href=global.url + '/edit') 
+						button.pure-button.pure-button-primary.edit_button.clearfix Edit
 		if posts
 			each post in posts
 				+row_post(post)

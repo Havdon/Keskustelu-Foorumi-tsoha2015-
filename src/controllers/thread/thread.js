@@ -1,11 +1,13 @@
 var Q = require('q');
 var Controller = require('../../controller');
-module.exports = Controller({
+var ThreadController = Controller({
 	name: 'thread',
 	init: function() {
 		this.get('f/:subforum_id/t', this.app.auth.require(), this.createView);
 		this.post('f/:subforum_id/t', this.app.auth.require(), this.create);
 		this.get('f/:subforum_id/t/:id', this.index);
+		this.get('f/:subforum_id/t/:id/edit', this.app.auth.require(), this.editView);
+		this.post('f/:subforum_id/t/:id/edit', this.app.auth.require(), this.update);
 	},
 
 	index: function(req, res) {
@@ -28,6 +30,64 @@ module.exports = Controller({
 		}).done();
 	},
 
+	editView: function(req, res) {
+		var self = this;
+		if (req.updateFail) {
+			console.log(req.body);
+			self.render(req, res, 'thread_edit', { thread: req.body, error: req.updateError });
+		}
+		else {
+			this.app.models.Thread.get({ thread_id: req.params.id})
+			.then(function(thread) {
+				if (req.session.auth !== true || thread.username !== req.session.username) {
+					res.sendStatus(401);
+					return;
+				}
+				self.render(req, res, 'thread_edit', { thread: thread });
+			}, function(err) {
+				if (err === 404) {
+					res.sendStatus(404);
+				}
+				else {
+					console.error(err);
+					res.sendStatus(505);
+				}
+			}).done();
+		}
+		
+		
+	},
+
+	update: function(req, res) {
+		if (!req.body.title || req.body.title.length < 1 || req.body.title.replace(/ /g,'').length < 1) {
+			req.updateFail = true;
+			req.updateError = 'Title cannot be empty.';
+			ThreadController.editView(req, res, req.body);
+			return;
+		}
+		var self = this;
+		this.app.models.Thread.get({thread_id: req.params.id})
+		.then(function(thread) {
+			if (req.session.auth !== true || thread.username !== req.session.username) {
+				res.redirect(self.app.config.url_prefix + '/auth');
+				return;
+			}
+			return self.app.models.Thread.update(req.body)
+					.then(function(thread) {
+						res.redirect(thread.getUrl());
+					}).done();
+		}, function(err) {
+			if (err === 404) {
+				res.sendStatus(404);
+			}
+			else {
+				console.error(err);
+				res.sendStatus(505);
+			}
+		}).done();
+		
+	},
+
 	createView: function(req, res) {
 		this.render(req, res, 'thread_create', { subforum_id: req.params.subforum_id });
 	},
@@ -45,3 +105,5 @@ module.exports = Controller({
 		}).done();
 	}
 });
+
+module.exports = ThreadController;

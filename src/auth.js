@@ -1,3 +1,7 @@
+/**
+	Utility functions conserning user authentication.
+	For the login process see the "Auth" controller in the "src/controllers/auth" folder.
+*/
 var shortid = require('shortid');
 var session = require('express-session');
 var Auth = {
@@ -14,7 +18,7 @@ var Auth = {
 		app.express.use(function (req, res, next) {
 			if (app.config.autoAdminLogin === true) {
 				req.session.auth = true;
-				req.session.username = 'admin';
+				req.session.username = (app.config.autoLoginUsername ? app.config.autoLoginUsername : 'admin');
 				req.session.save(function() {
 					next();
 				});
@@ -25,7 +29,7 @@ var Auth = {
 		});
 		this.app = app;
 	},
-
+	// Route middleware function which redirects to login if the user is not autheticated.
 	require: function() {
 		return function (req, res, next) {
 		  if (req.session.auth !== true) {
@@ -40,6 +44,7 @@ var Auth = {
 		};
 	},
 
+	// Route middleware which redirects to the site root if the user is logged in.
 	skipIfAuth: function() {
 		return function (req, res, next) {
 		  if (req.session.auth === true) {

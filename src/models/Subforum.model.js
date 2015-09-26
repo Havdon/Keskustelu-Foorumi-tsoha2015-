@@ -3,7 +3,7 @@ var Q = require('q'),
 
 var Model = require('../model');
 var Subforum = Model({
-
+	// Wraps raw database data and adds utility functions.
 	wrap: function(subforum) {
 		if (subforum instanceof Array) {
 			for(var i in subforum) {
