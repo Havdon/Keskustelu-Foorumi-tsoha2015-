@@ -58,7 +58,11 @@ var ThreadController = Controller({
 		
 	},
 
+	/**
+	*	Updates a thread.
+	*/
 	update: function(req, res) {
+		// If title is not present, render edit view with an error instead.
 		if (!req.body.title || req.body.title.length < 1 || req.body.title.replace(/ /g,'').length < 1) {
 			req.updateFail = true;
 			req.updateError = 'Title cannot be empty.';

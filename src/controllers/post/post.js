@@ -17,6 +17,9 @@ module.exports = Controller({
 		}).done();
 	},
 
+	/**
+	*	Deletes a post
+	*/
 	deletePost: function(req, res) {
 		var self = this;
 		this.app.models.Post.destroy({post_id: req.params.post_id, username: req.session.username})
