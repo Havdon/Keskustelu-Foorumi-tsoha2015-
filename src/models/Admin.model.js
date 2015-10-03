@@ -4,6 +4,7 @@ var Model = require('../model');
 
 
 var Admin = Model({
+
 	// Wraps raw database data and adds utility functions.
 	wrap: function(admin) {
 

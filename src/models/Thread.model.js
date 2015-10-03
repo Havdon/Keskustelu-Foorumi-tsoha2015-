@@ -51,6 +51,12 @@ var Thread = Model({
 
 	create: function(data) {
 		this.require(data, ['title', 'body', 'subforum_id', 'username'], 'Thread.create');
+		if (data.title.length < 1) {
+			return Q.reject("Thread title cannot be empty.");
+		}
+		else if(data.body.length < 5) {
+			return Q.reject("Thread content has to be at least 5 characters long.");
+		}
 		var thread = {
 			thread_id: shortid.generate(),
 			title: data.title,
@@ -70,6 +76,12 @@ var Thread = Model({
 	update: function(data) {
 		this.require(data, ['thread_id'], 'Thread.update');
 		this.validateWithSchema(data, ThreadSchema);
+		if (data.title.length < 1) {
+			return Q.reject("Thread title cannot be empty.");
+		}
+		else if(data.body.length < 5) {
+			return Q.reject("Thread content has to be at least 5 characters long.");
+		}
 		var set = '';
 		var ix = 0;
 		var attrCount = Object.keys(data).length;

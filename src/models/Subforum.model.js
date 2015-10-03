@@ -3,6 +3,7 @@ var Q = require('q'),
 
 var Model = require('../model');
 var Subforum = Model({
+
 	// Wraps raw database data and adds utility functions.
 	wrap: function(subforum) {
 		if (subforum instanceof Array) {
@@ -61,6 +62,12 @@ var Subforum = Model({
 	},
 	create: function(data) {
 		this.require(data, ['name', 'parent', 'username'], 'Subforum.create');
+		if (data.name.length < 1) {
+			return Q.reject("Subforum name cannot be empty.");
+		} 
+		else if (data.username.length < 1 || data.parent.length < 1) {
+			return Q.reject("Something went wrong.");
+		} 
 		var self = this;
 		var subforum = {
 			subforum_id: shortid.generate(),

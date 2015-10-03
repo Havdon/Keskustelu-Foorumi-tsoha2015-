@@ -79,6 +79,8 @@ var ThreadController = Controller({
 			return self.app.models.Thread.update(req.body)
 					.then(function(thread) {
 						res.redirect(thread.getUrl());
+					}, function(err) {
+						res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.id + '/edit?error=' + encodeURIComponent(err));
 					}).done();
 		}, function(err) {
 			if (err === 404) {
@@ -106,6 +108,8 @@ var ThreadController = Controller({
 			username: req.session.username
 		}).then(function(thread) {
 			res.redirect(thread.getUrl());
+		}, function(err) {
+			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t?error=' + encodeURIComponent(err));
 		}).done();
 	}
 });

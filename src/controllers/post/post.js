@@ -14,6 +14,8 @@ module.exports = Controller({
 			thread_id: req.params.thread_id
 		}).then(function(post) {
 			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.thread_id);
+		}, function(err) {
+			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.thread_id + '?error=' + encodeURIComponent(err) + '&body=' + encodeURIComponent(req.body.body) + '#post');
 		}).done();
 	},
 

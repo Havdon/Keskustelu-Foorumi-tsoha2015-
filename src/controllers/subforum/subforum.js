@@ -1,6 +1,5 @@
 var Q = require('q');
 var Controller = require('../../controller');
-
 module.exports = Controller({
 	name: 'subforum',
 	pathPrefix: 'f',
@@ -49,6 +48,8 @@ module.exports = Controller({
 		}).then(function(subforum) {
 			var url = subforum.getUrl();
 			res.redirect(url);
+		}, function(err) {
+			res.redirect(self.app.config.url_prefix + '/f/' + req.params.id + '/create/subforum?error=' + encodeURIComponent(err));
 		}).done();
 	}
 });

@@ -5,6 +5,8 @@ block content
 	h1 Create new thread
 	if error
 		.msg-error!=error
+	if global.query.error
+		.msg-error!=global.query.error
 	form.pure-form(action=global.url method="post")
 		fieldset.pure-group
 			legend Create new thread

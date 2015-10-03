@@ -9,6 +9,7 @@ module.exports = Controller({
 
 	index: function(req, res) {
 		var self = this;
+		// Gets the list of subforums the session user is admin of and filters out the once the user whos page we are on is admin of.
 		Q.all([this.app.models.Admin.getSubforumsUserIsAdminIn({
 			loadById: true,
 			username: req.session.username
@@ -39,14 +40,24 @@ module.exports = Controller({
 	},
 	makeAdmin: function(req, res) {
 		var self = this;
-		this.app.models.Admin.makeUserAdmin({
-			username: req.params.id,
-			subforum_id: req.body.subforum_id
-		}).then(function() {
-			res.redirect(self.app.config.url_prefix + '/user/' + req.params.id + "?madeAdmin=true");
-		}, function(err) {
-			self.app.log(err);
-			res.redirect(self.app.config.url_prefix + '/user/' + req.params.id + "?error=makeAdmin");
+		// Check if session user is admin of the subforum they are trying to make another user admin of.
+		self.app.models.Admin.isUserAdmin({username: req.session.username, subforum_id: req.body.subforum_id})
+		.then(function(isAdmin) {
+			if (!isAdmin) {
+				res.redirect(self.app.config.url_prefix + '/user/' + req.params.id + "?error=makeAdmin");
+			}
+			else{
+				return this.app.models.Admin.makeUserAdmin({
+					username: req.params.id,
+					subforum_id: req.body.subforum_id
+				}).then(function() {
+					res.redirect(self.app.config.url_prefix + '/user/' + req.params.id + "?madeAdmin=true");
+				}, function(err) {
+					self.app.log(err);
+					res.redirect(self.app.config.url_prefix + '/user/' + req.params.id + "?error=makeAdmin");
+				});
+			}
 		}).done();
+		
 	}
 });

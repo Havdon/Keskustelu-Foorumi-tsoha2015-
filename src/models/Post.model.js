@@ -56,6 +56,10 @@ var Post = Model({
 
 	create: function(data) {
 		this.require(data, ['body', 'thread_id', 'username'], 'Post.create');
+		if (data.body.length < 1) 
+			return Q.reject("Post content cannot be empty.");
+		if (data.thread_id.length < 1 || data.username.length < 1) 
+			return Q.reject("Something went wrong.");
 		var post = {
 			post_id: shortid.generate(),
 			body: data.body,
