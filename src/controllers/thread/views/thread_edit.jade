@@ -2,11 +2,11 @@ include ../../../views/partials
 extends ../../../views/layout
 
 block content
-	h1 Create new thread
-	if error
-		.msg-error!=error
-	if global.query.error
-		.msg-error!=global.query.error
+	h1 Edit thread
+
+	if errors
+		each error in errors
+			.msg-error!=error
 	form.pure-form(action=global.url method="post")
 		fieldset.pure-group
 			legend Create new thread

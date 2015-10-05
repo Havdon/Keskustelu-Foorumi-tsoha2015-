@@ -1,13 +1,11 @@
 var fs = require('fs'),
-	nodePath = require('path'),
-	Model = require('../model').Type;
+	nodePath = require('path');
 module.exports = function(app) {
 
 	var parseModels = function(name) {
 		if (name === nodePath.basename(__filename) || name.charAt(0) === '.') return;
 		
 		var model = require(__dirname + '/' + name);
-		app.assert(model instanceof Model, "Models need to be wrapped in the Model funciton: " + name);
 		model.__init(app);
 		name = name.replace('.model.js', '');
 		app.log('\n Model %s', name);

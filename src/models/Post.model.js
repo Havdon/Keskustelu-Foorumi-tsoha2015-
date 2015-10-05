@@ -2,7 +2,9 @@ var Q = require('q'),
 	shortid = require('shortid');
 var Model = require('../model');
 
-var Post = Model({
+var Post = Model(
+{	// Static methods
+
 	// Wraps raw database data and adds utility functions.
 	wrap: function(post) {
 
@@ -54,27 +56,6 @@ var Post = Model({
 		});
 	},
 
-	create: function(data) {
-		this.require(data, ['body', 'thread_id', 'username'], 'Post.create');
-		if (data.body.length < 1) 
-			return Q.reject("Post content cannot be empty.");
-		if (data.thread_id.length < 1 || data.username.length < 1) 
-			return Q.reject("Something went wrong.");
-		var post = {
-			post_id: shortid.generate(),
-			body: data.body,
-			username: data.username,
-			time: new Date().getTime() / 1000,
-			thread_id: data.thread_id
-		};
-		return this.app.db.execute('INSERT INTO Post (post_id, time, body, thread_id, username) VALUES (\'%post_id\', to_timestamp(%time), \'%body\', \'%thread_id\', \'%username\') RETURNING *', post).then(function(result) {
-			if (!result.rows || result.rows.length != 1) {
-				return Q.reject(404);
-			}
-			return Q(Post.wrap(result.rows[0]));
-		});
-	},
-
 	destroy: function(data) {
 		this.require(data, ['post_id', 'username'], 'Thread.destroy');
 		return this.app.db.execute('DELETE FROM Post WHERE post_id=\'%post_id\' AND username=\'%username\' RETURNING *', data)
@@ -85,6 +66,53 @@ var Post = Model({
 				}
 				return Q(Post.wrap(result.rows[0]));
 			});
+	}
+
+}, 
+{	// Instance methods
+
+	_constructor: function(data) {
+		this.setProperty('post_id', data.post_id, true);
+		this.setProperty('body', data.body);
+		this.setProperty('username', data.username, true);
+		this.setProperty('time', data.time, true);
+		this.setProperty('thread_id', data.thread_id, true);
+	},
+
+	save: function() {
+		if (!this.post_id)
+			return this.create();
+	},
+
+	create: function() {
+		var errors = this.getErrors();
+		if (errors.length > 0)
+			return Q.reject(errors);
+		if (this.post_id || this.time)
+			return Q.reject('Trying to create a post that has already been created.');
+		this.setProperty('post_id', shortid.generate());
+		this.setProperty('time', new Date().getTime() / 1000);
+		var self = this;
+		return this.app.db.execute('INSERT INTO Post (post_id, time, body, thread_id, username) VALUES (\'%post_id\', to_timestamp(%time), \'%body\', \'%thread_id\', \'%username\') RETURNING *', this.getProperties()).then(function(result) {
+			if (!result.rows || result.rows.length != 1) {
+				return Q.reject(404);
+			}
+			return Q(self);
+		});
+	},
+	validators: {
+		body: function() {
+			if (!this.body || this.body.length < 1)
+				return 'Post body cannot be empty.';
+			if (this.body.replace(/ /g,'').length < 1)
+				return 'Post body cannot be only whitespace.'
+		},
+		general: function() {
+			if (!this.username || this.username.length < 1)
+				return 'Post creator not defined.';
+			if (!this.thread_id || this.thread_id.length < 1)
+				return 'Post thread not defined.'
+		}
 	}
 
 });

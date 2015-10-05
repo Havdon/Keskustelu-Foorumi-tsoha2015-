@@ -10,33 +10,18 @@ var ThreadSchema = {
 	username: 'string',
 };
 
-var Thread = Model({
-	// Wraps raw thread data from database and adds utility functions.
-	wrap: function(thread) {
-		if (thread instanceof Array) {
-			for(var i in thread) {
-				thread[i] = Thread.wrap(thread[i]);
-			}
-		}
-		else {
-			if (thread.subforum_id)
-				thread.subforum_id = thread.subforum_id.replace(/ /g,'');
-			if (thread.thread_id)
-				thread.thread_id = thread.thread_id.replace(/ /g,'');
-			var self = this;
-			thread.getUrl = function() {
-				return self.app.config.url_prefix + '/f/' + thread.subforum_id + '/t/' + thread.thread_id;
-			};
-		}
-		return thread;
-	},
+var Thread = Model(
+{	// Static methods
+	
 	getList: function(data) {
 		this.require(data, ['subforum_id'], 'Thread.getList');
 		return this.app.db.execute('SELECT * FROM Thread WHERE subforum_id = \'%0\'', [data.subforum_id]).then(function(result) {
 			if (!result.rows || result.rows.length === 0) {
 				return Q.resolve([]);
 			}
-			return Q(Thread.wrap(result.rows));
+			for (var i in result.rows)
+				result.rows[i] = new Thread(result.rows[i]);
+			return Q(result.rows);
 		});
 	},
 	get: function(data) {
@@ -45,73 +30,128 @@ var Thread = Model({
 			if (!result.rows || result.rows.length != 1) {
 				return Q.reject(404);
 			}
-			return Q(Thread.wrap(result.rows[0]));
+			return Q(new Thread(result.rows[0]));
 		});
 	},
 
 	create: function(data) {
-		this.require(data, ['title', 'body', 'subforum_id', 'username'], 'Thread.create');
-		if (data.title.length < 1) {
-			return Q.reject("Thread title cannot be empty.");
-		}
-		else if(data.body.length < 5) {
-			return Q.reject("Thread content has to be at least 5 characters long.");
-		}
-		var thread = {
-			thread_id: shortid.generate(),
+		var thread = new Thread({
 			title: data.title,
 			body: data.body,
 			username: data.username,
 			subforum_id: data.subforum_id
-		};
-		return this.app.db.execute('INSERT INTO Thread (thread_id, title, body, subforum_id, username) VALUES (\'%thread_id\', \'%title\', \'%body\', \'%subforum_id\', \'%username\') RETURNING *', thread)
-		.then(function(result) {
-			if (!result.rows || result.rows.length != 1) {
-				return Q.reject(404);
-			}
-			return Q(Thread.wrap(result.rows[0]));
 		});
+		return thread.save();
 	},
 
-	update: function(data) {
-		this.require(data, ['thread_id'], 'Thread.update');
-		this.validateWithSchema(data, ThreadSchema);
-		if (data.title.length < 1) {
-			return Q.reject("Thread title cannot be empty.");
-		}
-		else if(data.body.length < 5) {
-			return Q.reject("Thread content has to be at least 5 characters long.");
-		}
+	
+
+}, 
+{	// Instance methods
+
+	_constructor: function(data) {
+		if (data.subforum_id)
+			data.subforum_id = data.subforum_id.replace(/ /g,'');
+		if (data.thread_id)
+			data.thread_id = data.thread_id.replace(/ /g,'');
+		this.setProperty('title', data.title);
+		this.setProperty('body', data.body);
+		this.setProperty('username', data.username);
+		this.setProperty('subforum_id', data.subforum_id);
+		this.setProperty('thread_id', data.thread_id, true);
+	},
+	getUrl: function() {
+		return this.app.config.url_prefix + '/f/' + this.subforum_id + '/t/' + this.thread_id;
+	},
+
+	save: function() {
+		if (this.thread_id) 
+			return this.update();
+		else
+			return this.create();
+	},
+
+	update: function() {
+		var errors = this.getErrors();
+		if (errors.length > 0)
+			return Q.reject(errors);
+		if (!this.thread_id)
+			return Q.reject('Trying to update thread that has not been created.');
 		var set = '';
 		var ix = 0;
+		var data = this.getProperties();
 		var attrCount = Object.keys(data).length;
 		for (var i in data) {
 			if (i === 'thread_id') continue;
 			var dataStr = data[i];
-			dataStr = dataStr.replace(/\'/g,"''");
+			if (typeof(dataStr) === 'string')
+				dataStr = dataStr.replace(/\'/g,"''");
 			set = set + i + ' = \'' + dataStr + '\'';
 			if (ix < attrCount - 2) 
 				set = set + ', ';
 			ix++;
 		}
+		var self = this;
 		// TODO: Fix SQL Injection danger.
-		return this.app.db.execute('UPDATE Thread SET ' + set + ' WHERE thread_id = \'' + data.thread_id + '\' RETURNING *')
+		return this.app.db.execute('UPDATE Thread SET ' + set + ' WHERE thread_id = \'' + this.thread_id + '\' RETURNING *')
 			.then(function(result) {
 				if (!result.rows || result.rows.length != 1) {
 					return Q.reject(404);
 				}
-				return Q(Thread.wrap(result.rows[0]));
+				return Q(self);
 			});
 	},
 
-	delete: function(data) {
-		this.require(data, ['thread_id'], 'Thread.delete');
-		return this.app.db.execute('DELETE FROM Thread WHERE thread_id=\'%thread_id\'', data)
+	create: function() {
+		var errors = this.getErrors();
+		if (errors.length > 0)
+			return Q.reject(errors);
+		if (this.thread_id)
+			return Q.reject('Trying to create thead that already has an id!');
+		this.setProperty('thread_id', shortid.generate());
+		var self = this;
+		return this.app.db.execute('INSERT INTO Thread (thread_id, title, body, subforum_id, username) VALUES (\'%thread_id\', \'%title\', \'%body\', \'%subforum_id\', \'%username\') RETURNING *', this.getProperties())
+		.then(function(result) {
+			if (!result.rows || result.rows.length != 1) {
+				return Q.reject(404);
+			}
+			return Q(self);
+		});
+	},
+
+	delete: function() {
+		var errors = this.getErrors();
+		if (errors.length > 0)
+			return Q.reject(errors);
+		if (!this.thread_id)
+			return Q.reject('Trying to delete thread that has not been created.');
+		var self = this;
+		return this.app.db.execute('DELETE FROM Thread WHERE thread_id=\'%thread_id\'', this.getProperties())
 			.then(function() {
+				self.clearProperties();
 				return Q();
 			});
-	}
+	},
 
+	validators: {
+		title: function() {
+			if (!this.title || this.title.length < 1)
+				return 'Thread title cannot be empty.';
+			if (this.title.replace(/ /g,'').length < 1)
+				return 'Thread title cannot be only whitespace.'
+		},
+		body: function() {
+			if (!this.body || this.body.length < 1)
+				return 'Thread body cannot be empty.';
+			if (this.body.replace(/ /g,'').length < 1)
+				return 'Thread body cannot be only whitespace.'
+		},
+		general: function() {
+			if (!this.username || !this.subforum_id 
+				|| this.username.replace(/ /g,'').length < 1 || this.subforum_id.replace(/ /g,'').length < 1)
+				return 'Something went wrong.';
+		} 
+	}
 });
 
 module.exports = Thread;

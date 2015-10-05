@@ -3,22 +3,7 @@ var Q = require('q'),
 
 var Model = require('../model');
 var Subforum = Model({
-
-	// Wraps raw database data and adds utility functions.
-	wrap: function(subforum) {
-		if (subforum instanceof Array) {
-			for(var i in subforum) {
-				subforum[i] = Subforum.wrap(subforum[i]);
-			}
-		}
-		else {
-			var self = this;
-			subforum.getUrl = function() {
-				return self.app.config.url_prefix + '/f/' + subforum.subforum_id;
-			};
-		}
-		return subforum;
-	},
+	// Static functions
 
 	getList: function(data) {
 		this.require(data, ['parent'], 'Subforum.getList');
@@ -27,7 +12,10 @@ var Subforum = Model({
 				if (!result.rows) {
 					return Q.reject([]);
 				}
-				return Q(Subforum.wrap(result.rows));
+				for (var i in result.rows) {
+					result.rows[i] = new Subforum(result.rows[i]);
+				}
+				return Q(result.rows);
 			});
 	},
 
@@ -48,7 +36,10 @@ var Subforum = Model({
 				if (!result.rows) {
 					return Q.reject([]);
 				}
-				return Q(Subforum.wrap(result.rows));
+				for (var i in result.rows) {
+					result.rows[i] = new Subforum(result.rows[i]);
+				}
+				return Q(result.rows);
 			});
 	},
 	getSingle: function(data) {
@@ -57,34 +48,81 @@ var Subforum = Model({
 			if (!result.rows || result.rows.length != 1) {
 				return Q.reject(404);
 			}
-			return Q(Subforum.wrap(result.rows[0]));
+			return Q(new Subforum(result.rows[0]));
 		});
 	},
 	create: function(data) {
-		this.require(data, ['name', 'parent', 'username'], 'Subforum.create');
-		if (data.name.length < 1) {
-			return Q.reject("Subforum name cannot be empty.");
-		} 
-		else if (data.username.length < 1 || data.parent.length < 1) {
-			return Q.reject("Something went wrong.");
-		} 
 		var self = this;
-		var subforum = {
-			subforum_id: shortid.generate(),
+		var subforum = new Subforum({
 			name: data.name,
 			parent: data.parent
-		};
-		return this.app.db.execute('INSERT INTO Subforum (subforum_id, name, parent) VALUES (\'%subforum_id\', \'%name\', \'%parent\') RETURNING *', subforum)
-			.then(function(result) {
-				subforum = Subforum.wrap(result.rows[0]);
-				return self.app.models.Admin.makeUserAdmin({
-					username: data.username,
-					subforum_id: subforum.subforum_id
-				}).then(function() {
-					return Q(subforum);
+		});
+		return subforum.save()
+				.then(function() {
+					return self.app.models.Admin.makeUserAdmin({
+						username: data.username,
+						subforum_id: subforum.subforum_id
+					}).then(function() {
+						return Q(subforum);
+					});
 				});
-			});
 	}
 
+},
+{
+	// Instance methods
+
+	_constructor: function(data) {
+		this.setProperty('name', data.name);
+		this.setProperty('subforum_id', data.subforum_id);
+		this.setProperty('parent', data.parent);
+	},
+
+	getUrl: function() {
+		return this.app.config.url_prefix + '/f/' + this.subforum_id;
+	},
+
+	save: function() {
+		var errors = this.getErrors();
+		if (errors.length > 0) {
+			return Q.reject(errors);
+		}
+		if (typeof this.subforum_id === 'undefined')
+			this.setProperty('subforum_id', shortid.generate());
+		var self =  this;
+		return this.app.db.execute('INSERT INTO Subforum (subforum_id, name, parent) VALUES (\'%subforum_id\', \'%name\', \'%parent\')', this.getProperties())
+			.then(function(result) {
+				return Q(self);
+			});
+	},
+
+	delete: function() {
+		var self = this;
+		return this.app.db.execute('DELETE FROM Subforum WHERE subforum_id=\'%subforum_id\' RETURNING *', this.getProperties())
+			.then(function(result) {
+				console.log(result);
+				if (!result.rows || result.rows.length != 1) {
+					return Q.reject(404);
+				}
+				self.clearProperties();
+				return Q();
+			});
+	},
+
+	validators: {
+		name: function() {
+			if (!this.name || this.name.length < 1) {
+				return 'Subforum name cannot be empty.';
+			}
+			if (this.name.replace(/ /g,'').length < 1) {
+				return 'Subforum name cannot be only whitespaces.'
+			}
+		},
+		parent: function() {
+			if (!this.parent || this.parent.replace(/ /g,'').length < 1) {
+				return 'Parent subforum id is empty.';
+			}
+		}
+	}
 });
 module.exports = Subforum;

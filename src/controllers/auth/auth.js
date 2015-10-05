@@ -36,14 +36,18 @@ var Auth = Controller({
 			return;
 		}
 		var self = this;
-		this.app.models.User.create(req.body).then(function(user) {
+		var user = new this.app.models.User({
+			username: req.body.username,
+			password: req.body.password
+		});
+		return user.save().then(function(user) {
 			req.session.auth = true;
 			req.session.username = req.body.username;
 			req.session.save(function(err) {
 				res.redirect(self.app.config.url_prefix + '/');
 			});
-		}, function() {
-			self.registerError(res, "exists");
+		}, function(err) {
+			self.registerError(res, err);
 		}).done();
 	},
 
@@ -57,6 +61,7 @@ var Auth = Controller({
 		}
 		var self = this;
 		this.app.models.User.get({username: req.body.username}).then(function(user) {
+			console.log(user);
 			if (user && user.validPassword(req.body.password)) {
 				req.session.auth = true;
 				req.session.username = req.body.username;

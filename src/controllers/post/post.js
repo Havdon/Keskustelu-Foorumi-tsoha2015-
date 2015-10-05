@@ -8,14 +8,18 @@ module.exports = Controller({
 	},
 	create: function(req, res) {
 		var self = this;
-		this.app.models.Post.create({
+		var post = new this.app.models.Post({
 			body: req.body.body,
 			username: req.session.username,
 			thread_id: req.params.thread_id
-		}).then(function(post) {
+		});
+		post.save().then(function(post) {
 			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.thread_id);
 		}, function(err) {
-			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.thread_id + '?error=' + encodeURIComponent(err) + '&body=' + encodeURIComponent(req.body.body) + '#post');
+			//res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.thread_id + '?error=' + encodeURIComponent(err) + '&body=' + encodeURIComponent(req.body.body) + '#post');
+			req.form = req.body;
+			req.form.errors = err;
+			self.app.controllers.thread.index(req, res);
 		}).done();
 	},
 

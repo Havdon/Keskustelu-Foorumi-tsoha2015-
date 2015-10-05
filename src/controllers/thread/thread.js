@@ -5,16 +5,17 @@ var ThreadController = Controller({
 	init: function() {
 		this.get('f/:subforum_id/t', this.app.auth.require(), this.createView);
 		this.post('f/:subforum_id/t', this.app.auth.require(), this.create);
-		this.get('f/:subforum_id/t/:id', this.index);
-		this.get('f/:subforum_id/t/:id/edit', this.app.auth.require(), this.editView);
-		this.post('f/:subforum_id/t/:id/edit', this.app.auth.require(), this.update);
+		this.get('f/:subforum_id/t/:thread_id', this.index);
+		this.get('f/:subforum_id/t/:thread_id/edit', this.app.auth.require(), this.editView);
+		this.post('f/:subforum_id/t/:thread_id/edit', this.app.auth.require(), this.update);
+		this.get('f/:subforum_id/t/:thread_id/delete', this.app.auth.require(), this.deleteThread);
 	},
 
 	index: function(req, res) {
 		var self = this;
 		Q.all([
-			this.app.models.Post.getList({ thread_id: req.params.id, loadById: true}),
-			this.app.models.Thread.get({ thread_id: req.params.id})
+			this.app.models.Post.getList({ thread_id: req.params.thread_id, loadById: true}),
+			this.app.models.Thread.get({ thread_id: req.params.thread_id})
 		]).then(function(data) {
 			var posts = data[0];
 			var thread = data[1];
@@ -34,10 +35,10 @@ var ThreadController = Controller({
 		var self = this;
 		if (req.updateFail) {
 			console.log(req.body);
-			self.render(req, res, 'thread_edit', { thread: req.body, error: req.updateError });
+			self.render(req, res, 'thread_edit', { thread: req.body, errors: req.updateError });
 		}
 		else {
-			this.app.models.Thread.get({ thread_id: req.params.id})
+			this.app.models.Thread.get({ thread_id: req.params.thread_id})
 			.then(function(thread) {
 				if (req.session.auth !== true || thread.username !== req.session.username) {
 					res.sendStatus(401);
@@ -58,29 +59,49 @@ var ThreadController = Controller({
 		
 	},
 
+	deleteThread: function(req, res) {
+		var self = this;
+		this.app.models.Thread.get({ thread_id: req.params.thread_id})
+		.then(function(thread) {
+			if (req.session.auth !== true || thread.username !== req.session.username) {
+				res.sendStatus(401);
+				return;
+			}
+			return thread.delete()
+				.then(function() {
+					res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id);
+				});
+		}, function(err) {
+			if (err === 404) {
+				res.sendStatus(404);
+			}
+			else {
+				console.error(err);
+				res.sendStatus(505);
+			}
+		}).done();
+	},
+
 	/**
 	*	Updates a thread.
 	*/
 	update: function(req, res) {
-		// If title is not present, render edit view with an error instead.
-		if (!req.body.title || req.body.title.length < 1 || req.body.title.replace(/ /g,'').length < 1) {
-			req.updateFail = true;
-			req.updateError = 'Title cannot be empty.';
-			ThreadController.editView(req, res, req.body);
-			return;
-		}
 		var self = this;
-		this.app.models.Thread.get({thread_id: req.params.id})
+		this.app.models.Thread.get({thread_id: req.params.thread_id})
 		.then(function(thread) {
 			if (req.session.auth !== true || thread.username !== req.session.username) {
 				res.redirect(self.app.config.url_prefix + '/auth');
 				return;
 			}
-			return self.app.models.Thread.update(req.body)
-					.then(function(thread) {
+			thread.title = req.body.title;
+			thread.body = req.body.body;
+			return thread.save()
+					.then(function() {
 						res.redirect(thread.getUrl());
 					}, function(err) {
-						res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.id + '/edit?error=' + encodeURIComponent(err));
+						req.updateFail = true;
+						req.updateError = err;
+						ThreadController.editView(req, res, req.body);
 					}).done();
 		}, function(err) {
 			if (err === 404) {

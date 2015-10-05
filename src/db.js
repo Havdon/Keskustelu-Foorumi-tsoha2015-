@@ -50,7 +50,7 @@ var db = {
 			str += ')';
 		}
 		else {
-			if(!(typeof(str) === 'number'))
+			if(typeof(str) === 'string')
 				str = str.replace(/\'/g,"''");
 		}
 		var find = '%' + insertName;

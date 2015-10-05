@@ -3,8 +3,8 @@ extends ../../../views/layout
 
 block content
 	h1 Register
-	if global.query.error == "exists"
-		.msg-error User already exists!
+	if global.query.error
+		.msg-error!=global.query.error
 	form.pure-form(action=global.url_prefix + '/auth/register' method="post")
 		fieldset.pure-group
 			input(type="text" placeholder="Username" name="username" required)

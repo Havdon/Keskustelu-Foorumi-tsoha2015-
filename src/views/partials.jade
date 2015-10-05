@@ -1,11 +1,11 @@
 mixin row_subforum(subforum, global)
-	a(href=global.url_prefix + '/f/' + subforum.subforum_id)
+	a(href=subforum.getUrl())
 		.pure-u-1.row.forum
 			.type forum
 			.name!=subforum.name
 
 mixin row_thread(thread, subforum_id, global)
-	a(href=global.url_prefix + '/f/' + subforum_id + '/t/' + thread.thread_id)
+	a(href=thread.getUrl())
 		.pure-u-1.row.thread
 			.type thread
 			.title!=thread.title

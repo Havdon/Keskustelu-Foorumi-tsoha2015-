@@ -15,6 +15,7 @@ var app = {
 	config: null,
 	assert:  require('assert'),
 	models: {},
+	controllers: {},
 	auth: null,
 	init: function(config) {
 		app.config = config;

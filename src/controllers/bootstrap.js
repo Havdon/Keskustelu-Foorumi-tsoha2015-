@@ -18,6 +18,7 @@ module.exports = function(app) {
 
 		views.push(__dirname + '/' + name + '/views');
 		controller.__init(app);
+		app.controllers[name] = controller;
 	};
 
 

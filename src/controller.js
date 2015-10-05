@@ -59,7 +59,7 @@ Controller.prototype.call  = function(method, args) {
 	return this.app.express[method].apply(this.app.express, args);
 };
 
-// Adds "global" object which is accessable in all jade files.
+// Adds objects which is accessable in all jade files.
 Controller.prototype.render = function(req, res, view, data) {
 	if(!data) data = {};
 	data.global = {};
@@ -68,6 +68,9 @@ Controller.prototype.render = function(req, res, view, data) {
 	data.global.auth = (req.session.auth === true);
 	data.global.username = req.session.username;
 	data.global.query = req.query;
+	data.request = req;
+	if (!data.request.form)
+		data.request.form = {};
 	res.render(view, data);
 };
 
