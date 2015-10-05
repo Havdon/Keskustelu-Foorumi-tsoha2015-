@@ -66,6 +66,18 @@ var Subforum = Model({
 						return Q(subforum);
 					});
 				});
+	},
+
+	search: function(query, limit) {
+		if (!limit)
+			limit = 10;
+		return this.app.db.execute('SELECT * FROM Subforum WHERE name ~* \'%query\' LIMIT ' + limit, {query: query})
+			.then(function(result) {
+				for (var i in result.rows) {
+					result.rows[i] = new Subforum(result.rows[i]);
+				}
+				return Q(result.rows);
+			});
 	}
 
 },

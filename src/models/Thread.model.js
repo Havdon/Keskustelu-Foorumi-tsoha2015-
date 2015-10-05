@@ -44,7 +44,17 @@ var Thread = Model(
 		return thread.save();
 	},
 
-	
+	search: function(query, limit) {
+		if (!limit)
+			limit = 10;
+		return this.app.db.execute('SELECT * FROM Thread WHERE title ~* \'%query\' OR body ~* \'%query\' LIMIT ' + limit, {query: query})
+			.then(function(result) {
+				for (var i in result.rows) {
+					result.rows[i] = new Thread(result.rows[i]);
+				}
+				return Q(result.rows);
+			});
+	}
 
 }, 
 {	// Instance methods
@@ -126,11 +136,15 @@ var Thread = Model(
 		if (!this.thread_id)
 			return Q.reject('Trying to delete thread that has not been created.');
 		var self = this;
-		return this.app.db.execute('DELETE FROM Thread WHERE thread_id=\'%thread_id\'', this.getProperties())
+		return this.app.models.Post.destroyByThread(self.getProperties())
 			.then(function() {
-				self.clearProperties();
-				return Q();
+				return self.app.db.execute('DELETE FROM Thread WHERE thread_id=\'%thread_id\'', self.getProperties())
+					.then(function() {
+						self.clearProperties();
+						return Q();
+					});
 			});
+		
 	},
 
 	validators: {

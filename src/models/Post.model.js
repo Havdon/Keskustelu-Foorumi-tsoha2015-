@@ -64,7 +64,14 @@ var Post = Model(
 				if (!result.rows || result.rows.length != 1) {
 					return Q.reject(404);
 				}
-				return Q(Post.wrap(result.rows[0]));
+				return Q();
+			});
+	},
+	destroyByThread: function(data) {
+		this.require(data, ['thread_id'], 'Thread.destroy');
+		return this.app.db.execute('DELETE FROM Post WHERE thread_id=\'%thread_id\'', data)
+			.then(function() {
+				return Q();
 			});
 	}
 

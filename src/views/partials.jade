@@ -18,6 +18,6 @@ mixin row_post(post)
 				a.username(href=global.url_prefix + '/user/' + post.user.username)!=post.user.username
 				.time!=post.time
 		.post-body!=post.body.replace(/\n/g, '<br />').replace(/\\n/g, '<br />')
-			if global.auth && global.username === post.user.username
+			if global.auth && (global.username === post.user.username || isAdmin)
 					a(href=global.url + '/delete/' + post.post_id) 
 						button.pure-button.button-error.edit_button.clearfix Delete

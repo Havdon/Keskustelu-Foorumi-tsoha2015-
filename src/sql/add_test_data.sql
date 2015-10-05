@@ -14,7 +14,8 @@ VALUES 	('admin', 'password'),
 
 -- THREADS
 INSERT INTO Thread (thread_id, title, body, subforum_id, username)
-VALUES ('00', 'Call of Duty is the best game ever!', 'Whos with me?', '0', 	'admin');
+VALUES ('00', 'Call of Duty is the best game ever!', 'Whos with me?', '0', 	'admin'),
+		('01', 'Thread by Billy', 'Best thread', '0', 	'billy');
 
 -- POSTS
 INSERT INTO Post (post_id, time, body, thread_id, username)

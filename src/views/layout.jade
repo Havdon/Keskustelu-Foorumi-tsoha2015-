@@ -9,12 +9,17 @@ html
 	body
 		.pure-g
 			#header.pure-u-1
-				a(href=global.url_prefix + "/")
-					h1 Keskustelufoorumi
 				if !global.auth
 					a.pure-button.pure-button-primary.login(href=global.url_prefix + '/auth') Login
 				else
 					a.pure-button.button-error.login(href=global.url_prefix + '/auth/logout') Logout
+				a(href=global.url_prefix + "/")
+					h1 Keskustelufoorumi
+				.search_form
+					form.pure-form(action=global.url_prefix + '/search' method="GET")
+						input.pure-input-1-3(placeholder="Search" name="q")
+						input.pure-button.button-success(type="submit" value="Search")
+				
 
 		#main.pure-g
 			.pure-u-1

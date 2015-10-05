@@ -13,6 +13,7 @@ block content
 				if global.auth && global.username === thread.username
 					a(href=global.url + '/edit') 
 						button.pure-button.pure-button-primary.edit_button.clearfix Edit
+				if global.auth && (global.username === thread.username || isAdmin)
 					a(href=thread.getUrl() + '/delete') 
 						button.pure-button.button-error.edit_button.clearfix Delete
 		if posts

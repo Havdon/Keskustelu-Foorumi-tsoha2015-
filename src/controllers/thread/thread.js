@@ -15,11 +15,13 @@ var ThreadController = Controller({
 		var self = this;
 		Q.all([
 			this.app.models.Post.getList({ thread_id: req.params.thread_id, loadById: true}),
-			this.app.models.Thread.get({ thread_id: req.params.thread_id})
+			this.app.models.Thread.get({ thread_id: req.params.thread_id}),
+			this.app.models.Admin.isUserAdmin({ username: req.session.username, subforum_id: req.params.subforum_id })
 		]).then(function(data) {
 			var posts = data[0];
 			var thread = data[1];
-			self.render(req, res, 'thread_index', { thread: thread, posts: posts});
+			var isAdmin = data[2];
+			self.render(req, res, 'thread_index', { thread: thread, posts: posts, isAdmin: isAdmin});
 		}, function(err) {
 			if (err === 404) {
 				res.sendStatus(404);
@@ -61,9 +63,13 @@ var ThreadController = Controller({
 
 	deleteThread: function(req, res) {
 		var self = this;
-		this.app.models.Thread.get({ thread_id: req.params.thread_id})
-		.then(function(thread) {
-			if (req.session.auth !== true || thread.username !== req.session.username) {
+		Q.all([
+			this.app.models.Thread.get({ thread_id: req.params.thread_id}),
+			this.app.models.Admin.isUserAdmin({ username: req.session.username, subforum_id: req.params.subforum_id })
+		]).then(function(data) {
+			var thread = data[0];
+			var isAdmin = data[1];
+			if (req.session.auth !== true || (thread.username !== req.session.username && !isAdmin)) {
 				res.sendStatus(401);
 				return;
 			}

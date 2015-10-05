@@ -1,0 +1,13 @@
+include ../../../views/partials
+extends ../../../views/layout
+
+block content
+	h2 Search results for "#{request.query.q}":
+	h5 Results: #{results.length}
+	.pure-g.listing
+		each result in results
+			a(href=result.url) 
+				.pure-u-1.row.search_result
+					.type!=result.type
+					.title!=result.title
+			

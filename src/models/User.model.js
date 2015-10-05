@@ -30,6 +30,17 @@ var User = Model(
 			}
 			return Q(new User(result.rows[0]));
 		});
+	},
+	search: function(query, limit) {
+		if (!limit)
+			limit = 10;
+		return this.app.db.execute('SELECT * FROM "User" WHERE username ~* \'%query\' LIMIT ' + limit, {query: query})
+			.then(function(result) {
+				for (var i in result.rows) {
+					result.rows[i] = new User(result.rows[i]);
+				}
+				return Q(result.rows);
+			});
 	}
 },
 {	// Instance methods
@@ -39,6 +50,10 @@ var User = Model(
 		this.setProperty('username', data.username, true);
 		this.setProperty('password', data.password);
 		this.setProperty('salt', data.salt, true);
+	},
+
+	getUrl: function() {
+		return this.app.config.url_prefix + '/user/' + this.username;
 	},
 
 	validPassword: function(password) {
