@@ -86,3 +86,10 @@ this.post('/route/path', this.app.auth.require(), this.routePathFunction);
 ```
 
 Auth kontrolleri käyttää [Käyttäjä mallia](https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/blob/master/src/models/User.model.js)
+
+### LOPULLINEN PALAUTUS
+Kaksi malliluokkaa jotka täyttävät CRUD kolmion ovat
+
+https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/blob/master/src/models/Thread.model.js
+
+https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/blob/master/src/models/Subforum.model.js
