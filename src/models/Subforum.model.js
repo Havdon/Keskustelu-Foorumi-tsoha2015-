@@ -95,6 +95,46 @@ var Subforum = Model({
 	},
 
 	save: function() {
+		if (!this.subforum_id) {
+			return this.create();
+		}
+		else {
+			return this.save();
+		}
+	},
+
+	create: function() {
+		var errors = this.getErrors();
+		if (errors.length > 0)
+			return Q.reject(errors);
+		if (!this.thread_id)
+			return Q.reject('Trying to update subforum that has not been created.');
+		var set = '';
+		var ix = 0;
+		var data = this.getProperties();
+		var attrCount = Object.keys(data).length;
+		for (var i in data) {
+			if (i === 'subforum_id') continue;
+			var dataStr = data[i];
+			if (typeof(dataStr) === 'string')
+				dataStr = dataStr.replace(/\'/g,"''");
+			set = set + i + ' = \'' + dataStr + '\'';
+			if (ix < attrCount - 2) 
+				set = set + ', ';
+			ix++;
+		}
+		var self = this;
+		// TODO: Fix SQL Injection danger.
+		return this.app.db.execute('UPDATE Subforum SET ' + set + ' WHERE subforum_id = \'' + this.subforum_id + '\' RETURNING *')
+			.then(function(result) {
+				if (!result.rows || result.rows.length != 1) {
+					return Q.reject(404);
+				}
+				return Q(self);
+			});
+	},
+
+	save: function() {
 		var errors = this.getErrors();
 		if (errors.length > 0) {
 			return Q.reject(errors);
