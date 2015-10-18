@@ -99,11 +99,11 @@ var Subforum = Model({
 			return this.create();
 		}
 		else {
-			return this.save();
+			return this.update();
 		}
 	},
 
-	create: function() {
+	update: function() {
 		var errors = this.getErrors();
 		if (errors.length > 0)
 			return Q.reject(errors);
@@ -134,7 +134,7 @@ var Subforum = Model({
 			});
 	},
 
-	save: function() {
+	create: function() {
 		var errors = this.getErrors();
 		if (errors.length > 0) {
 			return Q.reject(errors);
