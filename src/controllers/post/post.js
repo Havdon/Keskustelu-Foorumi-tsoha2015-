@@ -30,7 +30,7 @@ module.exports = Controller({
 		var self = this;
 		this.app.models.Post.destroy({post_id: req.params.post_id, username: req.session.username})
 		.then(function(post) {
-			res.redirect(self.app.config.url_prefix + '/f/' + post.subforum_id + '/t/' + post.thread_id);
+			res.redirect(self.app.config.url_prefix + '/f/' + req.params.subforum_id + '/t/' + req.params.thread_id);
 		}, function(err) {
 			if (err === 404) {
 				res.sendStatus(404);
