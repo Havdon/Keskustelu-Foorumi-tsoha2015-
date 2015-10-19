@@ -93,3 +93,7 @@ Kaksi malliluokkaa jotka täyttävät CRUD kolmion ovat
 https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/blob/master/src/models/Thread.model.js
 
 https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/blob/master/src/models/Subforum.model.js
+
+Monesta-moneen yhteys löytyy Admin mallista, joka liittää monta alifoorumia moneen käyttäjään: 
+
+https://github.com/Havdon/Keskustelu-Foorumi-tsoha2015-/blob/master/src/models/Admin.model.js
